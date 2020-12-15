@@ -24,7 +24,7 @@ exports.handler = async function (event, context) {
     const data = flatten(
       await Promise.all([
         getDetailsFromBooksTw(id),
-        getDetailsFromKingstone(id),
+        // getDetailsFromKingstone(id),
         getDetailsFromCite(id),
       ])
     );
@@ -120,62 +120,62 @@ async function getDetailsFromBooksTw(isbnNumber) {
 }
 
 // 金石堂 (kingstone.com.tw)
-async function getDetailsFromKingstone(isbnNumber) {
-  const response = [];
-  try {
-    const baseUrl = "https://www.kingstone.com.tw";
-    const searchUrl = "/search/result.asp?c_name=";
-    const { data } = await request.get(baseUrl + searchUrl + isbnNumber);
+// async function getDetailsFromKingstone(isbnNumber) {
+//   const response = [];
+//   try {
+//     const baseUrl = "https://www.kingstone.com.tw";
+//     const searchUrl = "/search/result.asp?c_name=";
+//     const { data } = await request.get(baseUrl + searchUrl + isbnNumber);
 
-    const $ = cheerio.load(data);
-    const result = $("div.box.row_list ul li");
-    if (result.length === 0) throw new Error("No result found");
+//     const $ = cheerio.load(data);
+//     const result = $("div.box.row_list ul li");
+//     if (result.length === 0) throw new Error("No result found");
 
-    result.each((i, e) => {
-      const bookUrl = $(e).find("a.anchor").attr("href");
-      const bookImage = $(e).find("a.anchor img").attr("src");
-      const bookName = $(e).find("a.anchor span").text().trim();
-      const bookCat = $(e)
-        .find("span.classification a.main_class")
-        .text()
-        .trim();
-      const bookAuthors = [];
-      $(e)
-        .find("span.author a")
-        .each((j, elem) => {
-          bookAuthors.push($(elem).text().trim());
-        });
-      const bookPublisher = $(e).find("span.publisher a").text().trim();
-      const bookPrice = $(e)
-        .find("span.price span")
-        .last()
-        .text()
-        .trim()
-        .match(/\d+/)
-        .join("");
+//     result.each((i, e) => {
+//       const bookUrl = $(e).find("a.anchor").attr("href");
+//       const bookImage = $(e).find("a.anchor img").attr("src");
+//       const bookName = $(e).find("a.anchor span").text().trim();
+//       const bookCat = $(e)
+//         .find("span.classification a.main_class")
+//         .text()
+//         .trim();
+//       const bookAuthors = [];
+//       $(e)
+//         .find("span.author a")
+//         .each((j, elem) => {
+//           bookAuthors.push($(elem).text().trim());
+//         });
+//       const bookPublisher = $(e).find("span.publisher a").text().trim();
+//       const bookPrice = $(e)
+//         .find("span.price span")
+//         .last()
+//         .text()
+//         .trim()
+//         .match(/\d+/)
+//         .join("");
 
-      response.push({
-        source: "金石堂",
-        active: true,
-        name: bookName || "",
-        cat: bookCat || "",
-        authors: bookAuthors.length > 0 ? bookAuthors.join() : "",
-        publisher: bookPublisher || "",
-        price: bookPrice ? parseInt(bookPrice, 10) : 0,
-        currency: "TWD",
-        url: bookUrl ? baseUrl + bookUrl : "",
-        image: bookImage || "",
-      });
-    });
-  } catch (e) {
-    console.log(e);
-    response.push({
-      source: "金石堂",
-      active: false,
-    });
-  }
-  return response;
-}
+//       response.push({
+//         source: "金石堂",
+//         active: true,
+//         name: bookName || "",
+//         cat: bookCat || "",
+//         authors: bookAuthors.length > 0 ? bookAuthors.join() : "",
+//         publisher: bookPublisher || "",
+//         price: bookPrice ? parseInt(bookPrice, 10) : 0,
+//         currency: "TWD",
+//         url: bookUrl ? baseUrl + bookUrl : "",
+//         image: bookImage || "",
+//       });
+//     });
+//   } catch (e) {
+//     console.log(e);
+//     response.push({
+//       source: "金石堂",
+//       active: false,
+//     });
+//   }
+//   return response;
+// }
 
 // 城邦讀書花園 (cite.com.tw)
 async function getDetailsFromCite(isbnNumber) {
@@ -225,8 +225,8 @@ async function getDetailsFromCite(isbnNumber) {
         publisher: bookPublisher || "",
         price: bookPrice ? parseInt(bookPrice, 10) : 0,
         currency: "TWD",
-        url: bookUrl ? bookUrl.replace("http://", "https://") : "",
-        image: bookImage || "",
+        url: `https://www.cite.com.tw${bookUrl}`,
+        image: bookImage ? `https:${bookImage}` : ``,
       });
     });
   } catch (e) {
