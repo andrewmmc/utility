@@ -36,6 +36,9 @@ exports.handler = async function (event, context) {
 
     return {
       statusCode: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({ data: responses }),
     };
   } catch (e) {
@@ -43,12 +46,19 @@ exports.handler = async function (event, context) {
 
     if (e.message) {
       return {
-        statusCode: 200,
+        statusCode: 400,
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ err: e.message }),
       };
     }
+
     return {
-      statusCode: 200,
+      statusCode: 500,
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({ err: "Unexpected error." }),
     };
   }
